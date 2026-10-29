@@ -1,0 +1,3 @@
+raylib 5.5 — official Windows MinGW-w64 release (raylib-5.5_win64_mingw-w64.zip)
+https://github.com/raysan5/raylib/releases/tag/5.5
+zlib/libpng license — see LICENSE. Used by build.zig on Windows when -Draylib_path is not given.
