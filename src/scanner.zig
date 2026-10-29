@@ -375,7 +375,9 @@ test "buildPathAlloc joins the parent chain" {
     var file = Node{ .name = "f.bin", .parent = &sub };
     const path = try buildPathAlloc(gpa, &file);
     defer gpa.free(path);
-    try std.testing.expectEqualStrings("/data/sub/f.bin", path);
+    // The joiner uses the platform's separator ('\' on Windows, '/' elsewhere).
+    const sep = std.fs.path.sep_str;
+    try std.testing.expectEqualStrings("/data" ++ sep ++ "sub" ++ sep ++ "f.bin", path);
 }
 
 /// Recursively check that every directory's size equals the sum of its

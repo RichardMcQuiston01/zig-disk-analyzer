@@ -1,14 +1,20 @@
 # Ideas
 
+[Back to README](./README.md)
+
+| [Status](#status) | [Settings menu](#settings-menu) | [Right-click context menu](#right-click-context-menu) |
+
 Planned quality-of-life improvements, with implementation notes.
 
 ## Status
 
-- [x] Settings menu: **Font** and **Font size**. Done; see "Settings" in
-  the README. The notes below are kept for reference.
+- [x] Settings menu: **Font** and **Font size**. Done; see
+  [Configuration](./CONFIGURATION.md). The notes below are kept for reference.
 - [ ] Settings menu: **Visualization method** (Circles, Spheres)
-- [x] Right-click context menu. Done; see "Right-click menu" in the README.
+- [x] Right-click context menu. Done; see [Features](./FEATURES.md#right-click-menu).
   Not yet done: Delete during a scan, and Delete on Linux/macOS (trash).
+
+[Back to Top](#ideas)
 
 ## Settings menu
 
@@ -59,6 +65,8 @@ Choose between **Arial**, **Times New Roman**, and **Courier**.
   `draw(shape)`) so hit-testing, tooltips, and click-to-drill-in work the same
   in every mode.
 
+[Back to Top](#ideas)
+
 ## Right-click context menu
 
 A small popup at the cursor on right-click, in both the list and the treemap.
@@ -86,3 +94,9 @@ Notes:
   unchanged.
 - **Non-Windows**: `xdg-open` / `open` for opening; `gio trash` or the
   freedesktop trash spec on Linux, and Finder's move-to-trash on macOS.
+
+[Back to Top](#ideas)
+
+---
+
+[Back to README](./README.md)

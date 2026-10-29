@@ -1,165 +1,131 @@
-# Disk Usage Analyzer (Zig + raylib)
+# Disk Usage Analyzer
 
-A small desktop tool that scans a drive and shows where the space went, two ways
-at once:
+- Author: [Richard McQuiston](mailto:richard.mcquiston@gmail.com)
+- Website: https://richardmcquiston.com/
 
-- **List view** (left) — every file/folder in the current directory with its
-  size, sorted largest-first, with a proportional bar.
-- **Treemap view** (right) — a squarified 2D map where each node's area is
-  proportional to its size on disk.
+## Table of Contents
 
-Pick a drive, and the list and treemap fill in **live** as the background scan
-walks the tree. Click any folder (in either view) to drill in; use the
-breadcrumb or **↑ Up** to go back.
+| [Overview](#overview) | [Getting Started](#getting-started) | [Features](#features) | [More Information](#more-information) | [Buy Me a Coffee](#buy-me-a-coffee) | [License](#license) | [Copyright](#copyright) |
 
-## Requirements
+## Overview
 
-- **Zig 0.16.0 or 0.17.0** (both verified). The code uses the `std.Io`
-  filesystem API, so Zig 0.15 and earlier won't work.
-- **raylib** — vendored for Windows; a system install on Linux/macOS.
+Disk Usage Analyzer shows you what is using the space on a drive.
+Pick a drive, and the app scans it in the background.
+The results fill in live, in two views side by side.
+The list view shows each file and folder with its size, largest first.
+The treemap view draws each one as a tile, and a bigger tile means a bigger item.
 
-## Build & run
+The app is a small desktop program written in [Zig](https://ziglang.org/).
+It uses [raylib](https://www.raylib.com/) for graphics.
+Windows is the main target, and it also runs on Linux.
 
-### Windows
+[Back to Top](#table-of-contents)
 
-No downloads or flags. A prebuilt raylib 5.5 (official MinGW-w64 release) is
-vendored in `vendor/raylib`, and the build defaults to the matching GNU ABI.
+## Getting Started
 
-```sh
-zig build run -Doptimize=ReleaseFast
-```
+### Prerequisites
 
-Output: `zig-out\bin\diskviz.exe`. It's a single self-contained executable
-(raylib is linked statically). Release builds run as a pure GUI app; Debug
-builds keep a console window open so panics and logs stay visible.
+- Zig 0.16.0 or 0.17.0. Check your version with `zig version`.
+- On Windows, nothing else. The repo includes a copy of raylib 5.5 in `vendor/raylib`.
+- On Linux, the raylib 5.5 Linux release and two system packages. See [Getting Started](./GETTING_STARTED.md#linux).
 
-### Linux / macOS
+### Installation
 
-Install raylib, then build:
+1. Clone the repo:
 
-```sh
-# Debian/Ubuntu:  sudo apt install libraylib-dev
-# macOS:          brew install raylib
-zig build run -Doptimize=ReleaseFast
-```
+   ```sh
+   git clone https://github.com/RichardMcQuiston01/zig-disk-analyzer.git
+   cd zig-disk-analyzer
+   ```
 
-### Using a different raylib
+2. Build the app:
 
-Point the build at any prebuilt raylib (the folder containing `lib/` and
-`include/`):
+   ```sh
+   zig build -Doptimize=ReleaseFast
+   ```
 
-```sh
-zig build run -Draylib_path="C:\path\to\raylib"
-```
+The app is saved as `zig-out\bin\diskviz.exe` on Windows, or `zig-out/bin/diskviz` on Linux.
+For Linux steps and build options, see [Getting Started](./GETTING_STARTED.md).
 
-On Windows, use a **MinGW-w64** build of raylib: the default target is the GNU
-ABI, which won't link against an MSVC `raylib.lib`.
+### Usage
 
-> **Why not build raylib from source?** The `raylib-zig` package tracks Zig
-> nightly, and its build script fails on stable Zig 0.16 and 0.17. Linking a
-> prebuilt raylib through the app's own C-ABI bindings (`src/raylib.zig`)
-> avoids depending on it entirely.
-
-## Controls
+1. Start the app with `zig build run -Doptimize=ReleaseFast`, or open `zig-out\bin\diskviz.exe`.
+2. Click a drive.
+3. Watch the list and the treemap fill in. Click any folder to look inside it.
 
 | Action | How |
 |---|---|
-| Choose a drive | Click a drive on the start screen |
-| Drill into a folder | Click its row (list) or tile (treemap) |
-| Go up one level | **↑ Up**, or click a breadcrumb segment |
-| Scroll the list | Mouse wheel over the list |
-| Rescan current drive | **Rescan** |
-| Pick a different drive | **Change Drive** |
-| Change font or text size | **Settings** (on the start screen and the top bar). Close with **Done**, Esc, or a click outside |
-| Open, reveal, or delete an item | **Right-click** its row or tile (see below) |
+| Open a folder | Click its row in the list, or its tile in the treemap |
+| Go back up | Click **Up**, or click a folder name in the path at the top |
+| Scroll the list | Use the mouse wheel over the list |
+| Open, show, or delete an item | Right-click its row or tile |
+| Change the font or text size | Click **Settings** |
+| Scan the same drive again | Click **Rescan** |
+| Pick another drive | Click **Change Drive** |
 
-## Right-click menu
+### Examples
 
-Right-click any row in the list or tile in the treemap:
+**Find what is filling up drive C**
 
-- **Open Folder** (folders): opens it in Explorer.
-- **Open Containing Folder** (files): opens the parent folder in Explorer with
-  the file selected.
-- **Delete (to Recycle Bin)**: asks for confirmation (showing the name, size,
-  and full path), then moves the item to the Recycle Bin.
-  - It runs in the background, so the window stays responsive. Windows may show
-    its own progress window.
-  - If an item can't be recycled (too large for the Recycle Bin, or a drive
-    without one), **Windows asks before deleting anything permanently**.
-  - When the item is confirmed gone, it's removed from the view and its size
-    is subtracted from every folder above it, with no rescan needed. Space is
-    actually freed when the Recycle Bin is emptied.
-  - If only part of a folder could be moved (files in use, protected files),
-    the app says so and suggests a rescan rather than guessing at the new
-    sizes.
-  - Delete is unavailable while a scan is running, because the scanner may
-    still be adding to that part of the tree.
-- Close the menu with Esc or by clicking anywhere else.
+1. Start the app and click `C:\`.
+2. The largest item is at the top of the list. It is also the largest tile.
+3. Click it to see what is inside. Repeat until you find the cause.
 
-On Linux and macOS, the two Open actions use the system's default file manager.
-Delete is Windows-only for now.
+**Free up space safely**
 
-## Settings
+1. Wait for the scan to finish.
+2. Right-click a file or folder you no longer need.
+3. Click **Delete (to Recycle Bin)**, then click **Move to Recycle Bin**.
+4. Empty the Recycle Bin to get the space back.
 
-- **Font**: Arial, Times New Roman, or Courier (Courier New on Windows). Fonts
-  load from `C:\Windows\Fonts`. On Linux the metric-compatible Liberation fonts
-  are used, then DejaVu; on macOS, the system copies. If a font file can't be
-  found, the app falls back to raylib's built-in font and the Settings dialog
-  says so.
-- **Text size**: Smaller (80%), Normal (100%), or Larger (120%). This scales
-  all text and the layout around it (row heights, padding, icons, buttons).
-- File names with accented letters, Greek, or Cyrillic render correctly with
-  any of the three fonts. Other scripts (e.g. Chinese, Japanese) need a font
-  that includes them, and still show as `?`.
-- Choices are saved to `diskviz.ini` next to the executable
-  (`zig-out\bin\diskviz.ini`) and restored on the next start.
+**Make the text bigger**
 
-## How scanning works
+1. Click **Settings**.
+2. Under **Text size**, click **Larger**. The app saves your choice for next time.
 
-- Scanning runs on a **background thread**, and the UI stays at 60 FPS.
-- Results are **live**. Each file and folder appears as soon as it's found, and
-  its size is added to every folder above it at the same moment. You can drill
-  into a folder mid-scan and watch it fill in. The view re-reads the tree 4
-  times a second while scanning, then once more when the scan finishes.
-- The UI reads the tree only through a snapshot that captures children and
-  their sizes together under the scan lock. The totals you see always add up,
-  even while the scan is still writing.
-- **Symlinks and junctions are not followed** (they count as negligible size).
-  This avoids cycles and double-counting.
-- Sizes are **apparent file sizes** (the sum of `stat` sizes), not on-disk block
-  allocation. Directories you can't read (permissions) count as empty.
-- On Windows, files the OS holds open exclusively (`pagefile.sys`,
-  `hiberfil.sys`, `swapfile.sys`) can't be opened to read their size. Their
-  size is read from directory metadata instead, so these often-huge files
-  aren't shown as 0 B.
+[Back to Top](#table-of-contents)
 
-## Project layout
+## Features
 
-| Path | Responsibility |
-|---|---|
-| `src/main.zig` | Window and render loop, allocator and `Io` setup |
-| `src/ui.zig` | Drive picker, list view, treemap view, settings dialog, navigation, input |
-| `src/typography.zig` | Font loading (per exact pixel size, so text stays sharp), size scaling, fit-to-width with "..." |
-| `src/settings.zig` | Font/size choices and the `diskviz.ini` format |
-| `src/shell.zig` | Open folder, reveal file, and move to Recycle Bin (Win32 shell APIs) |
-| `src/scanner.zig` | Threaded recursive scanner: arena-owned `Node` tree, atomics, cancellation |
-| `src/model.zig` | `Node` tree type, sorting, size fractions |
-| `src/treemap.zig` | Squarified treemap layout (pure geometry) |
-| `src/drives.zig` | Cross-platform drive/volume enumeration |
-| `src/format.zig` | Human-readable byte/percent formatting |
-| `src/raylib.zig` | Thin raylib C-ABI binding (only the functions the app uses) |
-| `vendor/raylib/` | raylib 5.5 static lib and header for Windows (zlib license) |
+- Results appear while the scan runs, so you do not have to wait for it to finish.
+- A list view and a treemap view show the same folder side by side.
+- A right-click menu can open a folder, show a file in its folder, or move an item to the Recycle Bin.
+- Settings let you pick a font (Arial, Times New Roman, or Courier) and a text size.
+- Names with accented, Greek, or Cyrillic letters show correctly.
 
-## Tests
+See [Features](./FEATURES.md) for how each part works.
 
-The pure logic and the threaded scanner are unit-tested. No GUI or display is
-needed:
+[Back to Top](#table-of-contents)
 
-```sh
-zig build test
-```
+## More Information
 
-The tests cover byte formatting, the squarified layout (area proportionality and
-containment), node sorting, end-to-end scans of known temp trees (including
-totals sampled mid-scan), the settings file format, and UTF-8-safe text
-truncation.
+- [Getting Started](./GETTING_STARTED.md): full build steps for Windows and Linux, build options, and tests.
+- [Features](./FEATURES.md): the views, live scanning, the right-click menu, and how sizes are counted.
+- [Configuration](./CONFIGURATION.md): the settings and the settings file.
+- [Tech Stack](./TECH_STACK.md): the tools, the project layout, and design notes.
+- [Troubleshooting](./TROUBLESHOOTING.md): fixes for common problems.
+- [Ideas](./IDEAS.md): planned improvements.
+
+[Back to Top](#table-of-contents)
+
+## Buy Me a Coffee
+
+If this app, code, or repository has helped you or someone you know, please consider donating. I appreciate any help to offset the costs of development and/or AI Credits.
+
+[**Donate via Stripe**](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800), or scan:
+
+[![Donate via Stripe](./donate.svg)](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800)
+
+[Back to Top](#table-of-contents)
+
+## License
+
+Apache 2
+
+[Back to Top](#table-of-contents)
+
+## Copyright
+
+(c)2026 Richard McQuiston. All rights reserved.
+
+[Back to Top](#table-of-contents)
